@@ -18,8 +18,19 @@ app = Flask(__name__)
 def index():
     return("PhilHealth Claims Fraud and Abuse Risk Scoring System")
 
+@app.route('/load_data', methods=['POST'])
+def load_data_in_es():
+    """ creates an index in elasticsearch """
+    url = "http://data.sfgov.org/resource/rqzj-sfat.json"
+    r = requests.get(url)
+    data = r.json()
+    print("Loading data in elasticsearch ...")
+    for id, truck in enumerate(data):
+        res = es.index(index="sfdata", doc_type="truck", id=id, body=truck)
+    print("Total trucks loaded: ", len(data))
 
-@app.route('/api/', methods=['GET', 'POST'])
+
+@app.route('/score/', methods=['GET', 'POST'])
 def get_data():
     try:
         data = request.get_json()
