@@ -59,14 +59,12 @@ services:
       - elastic
 
   api:
-    container_name: flask_api
+    container_name: api
     restart: always
     build: ./api
     volumes: ['./api:/api']
     depends_on:
       - es01
-      - es02
-      - es03
     networks:
       - elastic
     expose:

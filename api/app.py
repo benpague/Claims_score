@@ -7,10 +7,8 @@ import os
 import sys
 import requests
 
-es = Elasticsearch(host='es')
+es = Elasticsearch(host='es01')
 
-if es.ping():
-    print('connected to ES')
 
 app = Flask(__name__)
 
@@ -18,23 +16,13 @@ app = Flask(__name__)
 def index():
     return("PhilHealth Claims Fraud and Abuse Risk Scoring System")
 
-@app.route('/load_data', methods=['POST'])
-def load_data_in_es():
-    """ creates an index in elasticsearch """
-    url = "http://data.sfgov.org/resource/rqzj-sfat.json"
-    r = requests.get(url)
-    data = r.json()
-    print("Loading data in elasticsearch ...")
-    for id, truck in enumerate(data):
-        res = es.index(index="sfdata", doc_type="truck", id=id, body=truck)
-    print("Total trucks loaded: ", len(data))
 
 
 @app.route('/score/', methods=['GET', 'POST'])
 def get_data():
     try:
         data = request.get_json()
-        series = data['series']
+
         grp = data['id']
         hci = data['hci']
         hcp = data['hcp']
@@ -79,24 +67,24 @@ def get_data():
         hit8 = res8['hits']['hits'][0]['_source']
 
         # flag hospital outliers
-        if hci in hit1['current outliers']:
+        if hci in hit1['Current Outliers']:
             hci_cv_score += 1
-        if hci in hit2['current outliers']:
+        if hci in hit2['Current Outliers']:
             hci_cp_score += 1
-        if hci in hit3['previous outliers']:
+        if hci in hit3['Previous Outliers']:
             hci_pv_score += 1
-        if hci in hit4['previous outliers']:
+        if hci in hit4['Previous Outliers']:
             hci_pp_score += 1
 
         # flag doctor outliers
         for i in hcp:
-            if i in hit5['current outliers']:
+            if i in hit5['Current Outliers']:
                 hcp_cv_score += 1
-            if i in hit6['current outliers']:
+            if i in hit6['Current Outliers']:
                 hcp_cp_score += 1
-            if i in hit7['previous outliers']:
+            if i in hit7['Previous Outliers']:
                 hcp_pv_score += 1
-            if i in hit8['previous outliers']:
+            if i in hit8['Previous Outliers']:
                 hcp_pp_score += 1
         if hcp_cv_score >= 1:
             hcp_cv_score = 1
@@ -109,11 +97,11 @@ def get_data():
 
         # provider score for potential fraud
         s = (hci_cv_score * m1 + hci_cp_score * m2 + hci_pv_score * m3 + hci_pp_score * m4 + hcp_cv_score * m5 + hcp_cp_score * m6 + hcp_pv_score * m7 + hcp_pp_score * m8) / 8
-        return (jsonify(s))
-    # log score per series
+        return(jsonify(s))
+        # log score per series
 
     except Exception as esc:
-        return (jsonify('Disease Group Code Error'))
+        return(jsonify('IO Error'))
 
 
 if __name__ == '__main__':
