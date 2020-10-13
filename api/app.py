@@ -6,6 +6,7 @@ from flask import Flask, jsonify, request, render_template
 import os
 import sys
 import requests
+from datetime import datetime
 
 es = Elasticsearch(host='es01')
 
@@ -15,6 +16,28 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return("PhilHealth Claims Fraud and Abuse Risk Scoring System")
+
+@app.route('/insert_data', methods=['POST'])
+def insert_data():
+    try:
+        data = request.get_json()
+        index = data['index']
+        id = data['id']
+        group = data['group']
+
+        body = {
+            'group': group,
+            'timestamp': datetime.now()
+        }
+        result = es.index(index=index, id=id, doc_type='group', body=body)
+        return (jsonify(result))
+
+    except Exception as esc:
+        return (jsonify(esc))
+
+
+    except Exception as esc:
+        return(jsonify('IO Error'))
 
 
 
