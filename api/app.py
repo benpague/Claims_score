@@ -32,8 +32,7 @@ def insert_data():
         result = es.index(index=index, id=id, doc_type='group', body=body)
         return (jsonify(result))
 
-    except Exception as esc:
-        return (jsonify(esc))
+    
 
 
     except Exception as esc:
