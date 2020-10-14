@@ -123,7 +123,7 @@ def get_data():
         # log score per series
 
     except Exception as esc:
-        return(jsonify('IO Error'))
+        return(jsonify(0.00))
 
 
 if __name__ == '__main__':
