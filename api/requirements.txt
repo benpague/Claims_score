@@ -4,6 +4,7 @@ click==7.1.1
 DateTime==4.3
 elasticsearch==7.6.0
 Flask==1.1.2
+freetds==1.2.18
 gunicorn==20.0.4
 idna==2.9
 itsdangerous==1.1.0
@@ -12,7 +13,10 @@ jsonify==0.5
 MarkupSafe==1.1.1
 numpy==1.18.2
 pandas==1.0.3
+pymssql==2.1.5
+pyodbc==4.0.30
 python-dateutil==2.8.1
+Python-dev==2.0.0.dev0
 pytz==2019.3
 requests==2.23.0
 six==1.14.0
