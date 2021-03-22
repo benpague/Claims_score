@@ -80,17 +80,17 @@ def get_data():
         hit5 = res5['hits']['hits'][0]['_source']
 
         # flag hospital outliers
-        if hci in hit1['Outliers']:
+        if hci in hit1['group']['Outliers']:
             hci_v_score += 1
-        if hci in hit2['Outliers']:
+        if hci in hit2['group']['Outliers']:
             hci_p_score += 1
 
 
         # flag doctor outliers
         for i in hcp:
-            if i in hit3['Outliers']:
+            if i in hit3['group']['Outliers']:
                 hcp_v_score += 1
-            if i in hit4['Outliers']:
+            if i in hit4['group']['Outliers']:
                 hcp_p_score += 1
 
         if hcp_v_score >= 1:
@@ -99,7 +99,7 @@ def get_data():
             hcp_p_score = 1
 
         # flag LOS outliers
-        if los < hit5:
+        if los < hit5['group']:
             los_score = 1
 
         # provider score for potential fraud
