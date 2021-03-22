@@ -12,8 +12,6 @@ jsonify==0.5
 MarkupSafe==1.1.1
 numpy==1.18.2
 pandas==1.0.3
-pymssql==2.1.5
-pyodbc==4.0.30
 python-dateutil==2.8.1
 pytz==2019.3
 requests==2.23.0
