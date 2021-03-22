@@ -48,79 +48,64 @@ def get_data():
         grp = data['id']
         hci = data['hci']
         hcp = data['hcp']
+        los = data['los']
 
-        # metric scores
-        hci_cv_score = 0
-        hci_cp_score = 0
-        hci_pv_score = 0
-        hci_pp_score = 0
-        hcp_cv_score = 0
-        hcp_cp_score = 0
-        hcp_pv_score = 0
-        hcp_pp_score = 0
+        # Initialize metric scores to zero
+        hci_v_score = 0
+        hci_p_score = 0
+        hcp_v_score = 0
+        hcp_p_score = 0
+        los_score = 0
 
-        # metric importance factor
+
+        # metric importance factor, 1 by default
         m1 = 1
         m2 = 1
         m3 = 1
         m4 = 1
         m5 = 1
-        m6 = 1
-        m7 = 1
-        m8 = 1
 
-        # elasticsearch
-        res1 = es.search(index='hci_cv', body={'query': {'match': {'_id': grp}}})
-        res2 = es.search(index='hci_cp', body={'query': {'match': {'_id': grp}}})
-        res3 = es.search(index='hci_pv', body={'query': {'match': {'_id': grp}}})
-        res4 = es.search(index='hci_pp', body={'query': {'match': {'_id': grp}}})
-        res5 = es.search(index='hcp_cv', body={'query': {'match': {'_id': grp}}})
-        res6 = es.search(index='hcp_cp', body={'query': {'match': {'_id': grp}}})
-        res7 = es.search(index='hcp_pv', body={'query': {'match': {'_id': grp}}})
-        res8 = es.search(index='hcp_pp', body={'query': {'match': {'_id': grp}}})
+
+        # query elasticsearch database
+        res1 = es.search(index='hci_v', body={'query': {'match': {'_id': grp}}})
+        res2 = es.search(index='hci_p', body={'query': {'match': {'_id': grp}}})
+        res3 = es.search(index='hcp_v', body={'query': {'match': {'_id': grp}}})
+        res4 = es.search(index='hcp_p', body={'query': {'match': {'_id': grp}}})
+        res5 = es.search(index='los', body={'query': {'match': {'_id': grp}}})
 
         hit1 = res1['hits']['hits'][0]['_source']
         hit2 = res2['hits']['hits'][0]['_source']
         hit3 = res3['hits']['hits'][0]['_source']
         hit4 = res4['hits']['hits'][0]['_source']
         hit5 = res5['hits']['hits'][0]['_source']
-        hit6 = res6['hits']['hits'][0]['_source']
-        hit7 = res7['hits']['hits'][0]['_source']
-        hit8 = res8['hits']['hits'][0]['_source']
 
         # flag hospital outliers
-        if hci in hit1['Current Outliers']:
-            hci_cv_score += 1
-        if hci in hit2['Current Outliers']:
-            hci_cp_score += 1
-        if hci in hit3['Previous Outliers']:
-            hci_pv_score += 1
-        if hci in hit4['Previous Outliers']:
-            hci_pp_score += 1
+        if hci in hit1['Outliers']:
+            hci_v_score += 1
+        if hci in hit2['Outliers']:
+            hci_p_score += 1
+
 
         # flag doctor outliers
         for i in hcp:
-            if i in hit5['Current Outliers']:
-                hcp_cv_score += 1
-            if i in hit6['Current Outliers']:
-                hcp_cp_score += 1
-            if i in hit7['Previous Outliers']:
-                hcp_pv_score += 1
-            if i in hit8['Previous Outliers']:
-                hcp_pp_score += 1
-        if hcp_cv_score >= 1:
-            hcp_cv_score = 1
-        if hcp_cp_score >= 1:
-            hcp_cp_score = 1
-        if hcp_pv_score >= 1:
-            hcp_pv_score = 1
-        if hcp_pp_score >= 1:
-            hcp_pp_score = 1
+            if i in hit3['Outliers']:
+                hcp_v_score += 1
+            if i in hit4['Outliers']:
+                hcp_p_score += 1
+
+        if hcp_v_score >= 1:
+            hcp_v_score = 1
+        if hcp_p_score >= 1:
+            hcp_p_score = 1
+
+        # flag LOS outliers
+        if los < hit5:
+            los_score = 1
 
         # provider score for potential fraud
-        s = (hci_cv_score * m1 + hci_cp_score * m2 + hci_pv_score * m3 + hci_pp_score * m4 + hcp_cv_score * m5 + hcp_cp_score * m6 + hcp_pv_score * m7 + hcp_pp_score * m8) / 8
+        s = (hci_v_score * m1 + hci_p_score * m2 + hcp_v_score * m3 + hcp_p_score * m4 + los_score * m5) / 5
         return(jsonify(s))
-        # log score per series
+
 
     except Exception as esc:
         return(jsonify(0.00))
