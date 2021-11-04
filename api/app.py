@@ -65,6 +65,9 @@ def get_data():
         m4 = 1
         m5 = 1
 
+        # number of metrics used
+        num_metrics = 5
+
 
         # query elasticsearch database
         res1 = es.search(index='hci_v', body={'query': {'match': {'_id': grp}}})
@@ -99,11 +102,11 @@ def get_data():
             hcp_p_score = 1
 
         # flag LOS outliers
-        if los < hit5['group']:
+        if 0 < los < hit5['group']:
             los_score = 1
 
         # provider score for potential fraud
-        s = (hci_v_score * m1 + hci_p_score * m2 + hcp_v_score * m3 + hcp_p_score * m4 + los_score * m5) / 5
+        s = (hci_v_score * m1 + hci_p_score * m2 + hcp_v_score * m3 + hcp_p_score * m4 + los_score * m5) / num_metrics
         return(jsonify(s))
 
 
