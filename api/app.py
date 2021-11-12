@@ -56,6 +56,7 @@ def get_data():
         hcp_v_score = 0
         hcp_p_score = 0
         los_score = 0
+        other_flags_score = 0
 
 
         # metric importance factor, 1 by default
@@ -64,9 +65,10 @@ def get_data():
         m3 = 1
         m4 = 1
         m5 = 1
+        m6 = 1
 
         # number of metrics used
-        num_metrics = 5
+        num_metrics = 6
 
 
         # query elasticsearch database
@@ -75,12 +77,14 @@ def get_data():
         res3 = es.search(index='hcp_v', body={'query': {'match': {'_id': grp}}})
         res4 = es.search(index='hcp_p', body={'query': {'match': {'_id': grp}}})
         res5 = es.search(index='los', body={'query': {'match': {'_id': grp}}})
+        res6 = es.search(index='other_flags', body={'query': {'match': {'_id': grp}}})
 
         hit1 = res1['hits']['hits'][0]['_source']
         hit2 = res2['hits']['hits'][0]['_source']
         hit3 = res3['hits']['hits'][0]['_source']
         hit4 = res4['hits']['hits'][0]['_source']
         hit5 = res5['hits']['hits'][0]['_source']
+        hit6 = res6['hits']['hits'][0]['_source']
 
         # flag hospital outliers
         if hci in hit1['group']['Outliers']:
@@ -105,9 +109,15 @@ def get_data():
         if 0 < los < hit5['group']:
             los_score = 1
 
+        # flag other_flags
+        if grp in hit6['group']['priority_grp']:
+            other_flags_score = 1
+
         # provider score for potential fraud
-        s = (hci_v_score * m1 + hci_p_score * m2 + hcp_v_score * m3 + hcp_p_score * m4 + los_score * m5) / num_metrics
+        s = (hci_v_score * m1 + hci_p_score * m2 + hcp_v_score * m3 + hcp_p_score * m4 + los_score * m5 + other_flags_score * m6) / num_metrics
         return(jsonify(s))
+
+
 
 
     except Exception as esc:
