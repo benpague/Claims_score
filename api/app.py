@@ -107,7 +107,7 @@ def get_data():
             los_score = 1
 
         # flag other_flags
-        if grp in hit6['group']['priority_grp']:
+        if grp in hit6['group']:
             other_flags_score += 1
 
         # provider score for potential fraud
