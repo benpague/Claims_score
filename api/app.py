@@ -121,6 +121,7 @@ def get_data():
 
 
     except Exception as esc:
+        print(esc)
         return(jsonify(0.00))
 
 
