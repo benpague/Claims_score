@@ -75,7 +75,7 @@ def get_data():
         res3 = es.search(index='hcp_v', body={'query': {'match': {'_id': grp}}})
         res4 = es.search(index='hcp_p', body={'query': {'match': {'_id': grp}}})
         res5 = es.search(index='los', body={'query': {'match': {'_id': grp}}})
-        res6 = es.search(index='other_flags', body={'query': {'match': {'_id': grp}}})
+        res6 = es.search(index='other_flags', body={'query': {'match': {'_id': 'priority_grp'}}})
 
         hit1 = res1['hits']['hits'][0]['_source']
         hit2 = res2['hits']['hits'][0]['_source']
@@ -108,7 +108,7 @@ def get_data():
 
         # flag other_flags
         if grp in hit6['group']['priority_grp']:
-            other_flags_score = 1
+            other_flags_score += 1
 
         # provider score for potential fraud
         s = (hci_v_score * m1 + hci_p_score * m2 + hcp_v_score * m3 + hcp_p_score * m4 + los_score * m5 + other_flags_score * m6) / num_metrics
