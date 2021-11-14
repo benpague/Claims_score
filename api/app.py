@@ -10,12 +10,13 @@ from datetime import datetime
 
 es = Elasticsearch(host='es01')
 
-
 app = Flask(__name__)
+
 
 @app.route('/')
 def index():
-    return("PhilHealth Claims Fraud and Abuse Risk Scoring System")
+    return ("PhilHealth Claims Fraud and Abuse Risk Scoring System")
+
 
 @app.route('/insert_data', methods=['POST'])
 def insert_data():
@@ -32,12 +33,11 @@ def insert_data():
         result = es.index(index=index, id=id, doc_type='group', body=body)
         return (jsonify(result))
 
-    
+
 
 
     except Exception as esc:
-        return(jsonify('IO Error'))
-
+        return (jsonify('IO Error'))
 
 
 @app.route('/score/', methods=['GET', 'POST'])
@@ -56,8 +56,7 @@ def get_data():
         hcp_v_score = 0
         hcp_p_score = 0
         los_score = 0
-        #other_flags_score = 0
-
+        # other_flags_score = 0
 
         # metric importance factor, 1 by default
         m1 = 1
@@ -65,11 +64,10 @@ def get_data():
         m3 = 1
         m4 = 1
         m5 = 1
-        #m6 = 1
+        # m6 = 1
 
         # number of metrics used
         num_metrics = 5
-
 
         # query elasticsearch database
         res1 = es.search(index='hci_v', body={'query': {'match': {'_id': grp}}})
@@ -77,21 +75,20 @@ def get_data():
         res3 = es.search(index='hcp_v', body={'query': {'match': {'_id': grp}}})
         res4 = es.search(index='hcp_p', body={'query': {'match': {'_id': grp}}})
         res5 = es.search(index='los', body={'query': {'match': {'_id': grp}}})
-        #res6 = es.search(index='other_flags', body={'query': {'match': {'_id': grp}}})
+        # res6 = es.search(index='other_flags', body={'query': {'match': {'_id': grp}}})
 
         hit1 = res1['hits']['hits'][0]['_source']
         hit2 = res2['hits']['hits'][0]['_source']
         hit3 = res3['hits']['hits'][0]['_source']
         hit4 = res4['hits']['hits'][0]['_source']
         hit5 = res5['hits']['hits'][0]['_source']
-        #hit6 = res6['hits']['hits'][0]['_source']
+        # hit6 = res6['hits']['hits'][0]['_source']
 
         # flag hospital outliers
         if hci in hit1['group']['Outliers']:
             hci_v_score += 1
         if hci in hit2['group']['Outliers']:
             hci_p_score += 1
-
 
         # flag doctor outliers
         for i in hcp:
@@ -110,22 +107,19 @@ def get_data():
             los_score = 1
 
         # flag other_flags
-        #if grp in hit6['group']['priority_grp']:
+        # if grp in hit6['group']['priority_grp']:
         #    other_flags_score = 1
 
         # provider score for potential fraud
         s = (hci_v_score * m1 + hci_p_score * m2 + hcp_v_score * m3 + hcp_p_score * m4 + los_score * m5) / num_metrics
-        return(jsonify(s))
+        return jsonify(s)
 
 
 
 
     except Exception as esc:
-
-        return(jsonify(0.00))
+        return jsonify(esc)
 
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
-
-
