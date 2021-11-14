@@ -118,7 +118,7 @@ def get_data():
 
 
     except Exception as esc:
-        return jsonify(esc)
+        return jsonify(0.00)
 
 
 if __name__ == '__main__':
